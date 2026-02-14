@@ -1,8 +1,8 @@
 // WEB - Document Signature App/SealFlow/client/src/components/PDFEditor.jsx
 
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import { useState, useRef, useCallback, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
+import axios from "axios";
 
 const PDFEditor = ({ doc, onClose }) => {
   const { token } = useAuth();
@@ -18,21 +18,21 @@ const PDFEditor = ({ doc, onClose }) => {
   const fetchSignatures = async () => {
     try {
       const res = await axios.get(`/api/signatures/${doc._id}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       setSignatures(res.data);
     } catch (err) {
-      console.error('Failed to fetch signatures');
+      console.error("Failed to fetch signatures");
     }
   };
 
   const startDrawing = (e) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = '#1e40af';
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#1e40af";
     setIsDrawing(true);
     const rect = canvas.getBoundingClientRect();
     ctx.beginPath();
@@ -42,7 +42,7 @@ const PDFEditor = ({ doc, onClose }) => {
   const draw = (e) => {
     if (!isDrawing || !canvasRef.current) return;
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     const rect = canvas.getBoundingClientRect();
     ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
     ctx.stroke();
@@ -54,37 +54,69 @@ const PDFEditor = ({ doc, onClose }) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    
+
     // FIXED: Check if canvas has any non-transparent pixels
     let hasContent = false;
     for (let i = 3; i < imageData.data.length; i += 4) {
-      if (imageData.data[i] < 255) { // Alpha channel
+      if (imageData.data[i] < 255) {
+        // Alpha channel
         hasContent = true;
         break;
       }
     }
-    
+
     if (!hasContent) {
-      alert('Please draw a signature first');
+      alert("Please draw a signature first");
       return;
     }
 
-    const dataUrl = canvas.toDataURL('image/png');
+    const dataUrl = canvas.toDataURL("image/png");
     const previewId = Date.now();
-    
-    setSignatures(prev => [...prev, {
-      id: previewId,
-      dataUrl,
-      x: 100,
-      y: 100,
-      width: 150,
-      height: 50
-    }]);
-    
+
+    setSignatures((prev) => [
+      ...prev,
+      {
+        id: previewId,
+        dataUrl,
+        x: 100,
+        y: 100,
+        width: 150,
+        height: 50,
+      },
+    ]);
+
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
+
+  // ADD FINALIZE FUNCTION HERE
+  const finalizeDocument = async () => {
+    try {
+      const res = await axios.post(`/api/docs/${doc._id}/sign`, {
+        signatures: signatures.map((sig) => ({
+          x: sig.x,
+          y: sig.y,
+          width: sig.width,
+          height: sig.height,
+          page: 1,
+          signatureData: sig.dataUrl,
+        })),
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // Auto-download signed PDF
+      const link = document.createElement("a");
+      link.href = `http://localhost:5000${res.data.downloadUrl}`;
+      link.download = `signed_${doc.originalName}`;
+      link.click();
+
+      onClose(); // Close modal
+    } catch (err) {
+      alert("Failed to generate signed PDF");
+    }
   };
 
   return (
@@ -93,17 +125,37 @@ const PDFEditor = ({ doc, onClose }) => {
         <div className="p-6 border-b bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-t-2xl">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-bold">Sign Document</h2>
-            <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg">✕</button>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-white/20 rounded-lg"
+            >
+              ✕
+            </button>
           </div>
           <p>{doc?.originalName}</p>
         </div>
         <div className="flex flex-1 p-6 overflow-hidden">
           <div className="flex-1 border-r pr-6">
-            <div ref={containerRef} className="relative w-full h-[500px] bg-gray-100 rounded-xl border-2 border-dashed border-blue-300">
-              <img src={`/uploads/${doc?.filename}`} alt="PDF" className="w-full h-full object-contain" />
-              {signatures.map(sig => (
-                <div key={sig.id} className="absolute bg-white border-2 border-green-400 rounded shadow-lg p-1" 
-                     style={{ left: sig.x, top: sig.y, width: sig.width, height: sig.height }}>
+            <div
+              ref={containerRef}
+              className="relative w-full h-[500px] bg-gray-100 rounded-xl border-2 border-dashed border-blue-300"
+            >
+              <img
+                src={`/uploads/${doc?.filename}`}
+                alt="PDF"
+                className="w-full h-full object-contain"
+              />
+              {signatures.map((sig) => (
+                <div
+                  key={sig.id}
+                  className="absolute bg-white border-2 border-green-400 rounded shadow-lg p-1"
+                  style={{
+                    left: sig.x,
+                    top: sig.y,
+                    width: sig.width,
+                    height: sig.height,
+                  }}
+                >
                   <img src={sig.dataUrl} className="w-full h-full" />
                 </div>
               ))}
@@ -111,18 +163,40 @@ const PDFEditor = ({ doc, onClose }) => {
           </div>
           <div className="w-80 pl-6">
             <h3 className="font-bold mb-4">Draw Signature</h3>
-            <canvas ref={canvasRef} width={300} height={120} className="w-full h-32 border-2 border-dashed rounded-xl mb-4 cursor-crosshair"
-              onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={stopDrawing} />
-            <button onClick={createSignaturePreview} 
-              className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold mb-4">
+            <canvas
+              ref={canvasRef}
+              width={300}
+              height={120}
+              className="w-full h-32 border-2 border-dashed rounded-xl mb-4 cursor-crosshair"
+              onMouseDown={startDrawing}
+              onMouseMove={draw}
+              onMouseUp={stopDrawing}
+            />
+            <button
+              onClick={createSignaturePreview}
+              className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold mb-4"
+            >
               Add to PDF
             </button>
             <div className="text-sm text-gray-600 space-y-1">
-              <div>{signatures.length} signature{signatures.length !== 1 ? 's' : ''}</div>
-              <button onClick={fetchSignatures} className="w-full text-xs bg-green-500 text-white py-2 rounded mt-2">
+              <div>
+                {signatures.length} signature
+                {signatures.length !== 1 ? "s" : ""}
+              </div>
+              <button
+                onClick={fetchSignatures}
+                className="w-full text-xs bg-green-500 text-white py-2 rounded mt-2"
+              >
                 Save Positions
               </button>
             </div>
+            <button
+              onClick={finalizeDocument}
+              className="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-white py-3 px-6 rounded-xl font-bold text-lg shadow-2xl hover:from-emerald-600 hover:to-green-700 transition-all mt-4"
+              disabled={signatures.length === 0}
+            >
+              🎉 Finalize & Download Signed PDF
+            </button>
           </div>
         </div>
       </div>
