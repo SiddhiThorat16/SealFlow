@@ -3,6 +3,7 @@
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Dashboard from './components/Dashboard';
 import Login from './components/Login';
+import PDFEditor from './components/PDFEditor';  // FIXED: Correct components/ path
 
 function AppContent() {
   const { user } = useAuth();

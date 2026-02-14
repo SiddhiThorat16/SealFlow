@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getDocuments } from '../utils/api';
 import DocumentPreview from './DocumentPreview';
+import PDFEditor from './PDFEditor';  // Import separate component
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -27,7 +28,6 @@ const Dashboard = () => {
     }
   };
 
-  // ADD THIS FUNCTION - FIXES ERROR
   const handlePlaceSignature = (doc) => {
     setSelectedDoc(doc);
     setShowSignatureModal(true);
@@ -75,29 +75,15 @@ const Dashboard = () => {
             ))}
           </div>
         )}
-      </div>
 
-      {/* Signature Modal - Basic placeholder */}
-      {showSignatureModal && selectedDoc && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b">
-              <h2 className="text-2xl font-bold text-gray-900">Sign {selectedDoc.originalName}</h2>
-            </div>
-            <div className="p-6">
-              <p>Signature canvas will go here (Day 6)</p>
-              <div className="mt-6 flex gap-3">
-                <button 
-                  onClick={() => setShowSignatureModal(false)}
-                  className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+        {/* FIXED MODAL - Only this section changed */}
+        {showSignatureModal && selectedDoc && (
+          <PDFEditor 
+            doc={selectedDoc} 
+            onClose={() => setShowSignatureModal(false)} 
+          />
+        )}
+      </div>
     </div>
   );
 };
