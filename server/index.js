@@ -22,6 +22,9 @@ app.use('/api/docs', require('./routes/documents'));  // Document routes
 // SERVE UPLOADED PDFs STATICALLY - ADD THESE 2 LINES
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+app.use('/api/signatures', require('./routes/signatures'));
+
+
 mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://thoratsiddhi35_db_user:GkcwFSFbDUzhpg70@sealflow.aitr0cz.mongodb.net/')
   .then(() => console.log('MongoDB connected!'))
   .catch(err => console.error('DB error:', err));
