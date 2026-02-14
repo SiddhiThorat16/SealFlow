@@ -1,16 +1,22 @@
 // WEB - Document Signature App/SealFlow/client/src/App.jsx
 
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Dashboard from './components/Dashboard';
+import Login from './components/Login';
+
+function AppContent() {
+  const { user } = useAuth();
+  return user ? <Dashboard /> : <Login />;
+}
 
 function App() {
   return (
-    <div class="bg-blue-500 text-white p-8 text-2xl font-bold min-h-screen flex items-center justify-center">
-      SealFlow Test – Tailwind Working! 🚀
-    </div>
-  )
+    <AuthProvider>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <AppContent />
+      </div>
+    </AuthProvider>
+  );
 }
 
-export default App
+export default App;
