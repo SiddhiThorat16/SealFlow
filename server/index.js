@@ -24,6 +24,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api/signatures', require('./routes/signatures'));
 
+app.use('/api/public', require('./routes/public'));
+
 
 mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://thoratsiddhi35_db_user:GkcwFSFbDUzhpg70@sealflow.aitr0cz.mongodb.net/')
   .then(() => console.log('MongoDB connected!'))
