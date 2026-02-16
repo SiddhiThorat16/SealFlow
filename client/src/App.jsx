@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard';
 import Login from './components/Login';
 import PDFEditor from './components/PDFEditor';
 import PublicSign from './pages/PublicSign';
+import AuditTrail from './components/AuditTrail';
 
 function AppContent() {
   const { user } = useAuth();
@@ -20,6 +21,7 @@ function App() {
           <Routes>  {/* ADD ROUTES */}
             <Route path="/" element={<AppContent />} />
             <Route path="/public-sign/:token" element={<PublicSign />} />
+            <Route path="/audit/:fileId" element={<AuditTrail />} />
           </Routes>
         </div>
       </Router>

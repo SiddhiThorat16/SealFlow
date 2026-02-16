@@ -182,4 +182,32 @@ router.post('/:id/email-signature-link', auth, async (req, res) => {
   }
 });
 
+// GET /api/docs/:fileId/audit - Get audit trail
+router.get('/:fileId/audit', auth, async (req, res) => {
+  try {
+    const audits = await AuditLog.find({ documentId: req.params.fileId })
+      .populate('userId', 'name email')
+      .sort({ createdAt: -1 })
+      .limit(50);
+
+    res.json({
+      success: true,
+      documentId: req.params.fileId,
+      count: audits.length,
+      logs: audits.map(log => ({
+        id: log._id,
+        action: log.action,
+        timestamp: log.createdAt,
+        user: log.userId ? `${log.userId.name} (${log.userId.email})` : 'Public User',
+        email: log.signerEmail || 'N/A',
+        ip: log.ipAddress,
+        details: log.details
+      }))
+    });
+  } catch (err) {
+    console.error('Audit error:', err);
+    res.status(500).json({ success: false, msg: 'Audit fetch failed' });
+  }
+});
+
 module.exports = router;

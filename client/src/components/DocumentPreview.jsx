@@ -1,19 +1,25 @@
 // WEB - Document Signature App/SealFlow/client/src/components/DocumentPreview.jsx
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";  // ADD AUTH CONTEXT
 
-const DocumentPreview = ({ filePath, filename, doc, onPlaceSignature }) => {
+const DocumentPreview = ({ filePath, filename, doc, onAction, onPlaceSignature }) => {
   const [signatures, setSignatures] = useState([]);
+  const { token } = useAuth();  // ADD TOKEN
 
-  // Fetch signatures on mount
+  // FIXED: Add Authorization header to prevent 401
   useEffect(() => {
-    if (doc?._id) {
-      fetch(`/api/signatures/${doc._id}`)
-        .then(res => res.json())
+    if (doc?._id && token) {
+      fetch(`/api/signatures/${doc._id}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`  // FIX 401 ERROR
+        }
+      })
+        .then((res) => res.json())
         .then(setSignatures)
         .catch(console.error);
     }
-  }, [doc?._id]);
+  }, [doc?._id, token]);  // ADD token dependency
 
   const proxyUrl = `/uploads/${filePath.split(/[\\/]/).pop()}`;
 
@@ -21,18 +27,30 @@ const DocumentPreview = ({ filePath, filename, doc, onPlaceSignature }) => {
     <div className="relative group">
       <div className="border rounded-lg shadow-sm bg-white overflow-hidden max-h-[500px] hover:shadow-md transition-shadow">
         <div className="p-4 border-b bg-gradient-to-r from-gray-50 to-gray-100">
-          <h3 className="font-semibold text-gray-900 text-lg truncate pr-2">{filename}</h3>
+          <h3 className="font-semibold text-gray-900 text-lg truncate pr-2">
+            {filename}
+          </h3>
           <p className="text-xs text-gray-500 mt-1">Pending signature</p>
         </div>
         <div className="p-6 bg-gradient-to-br from-white to-gray-50 flex flex-col items-center justify-center h-64">
           <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            <svg
+              className="w-8 h-8 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
             </svg>
           </div>
           <h4 className="text-xl font-bold text-gray-900 mb-1">PDF Preview</h4>
           <p className="text-gray-600 text-sm mb-4 text-center max-w-xs">
-            {filename.length > 30 ? filename.slice(0, 30) + '...' : filename}
+            {filename.length > 30 ? filename.slice(0, 30) + "..." : filename}
           </p>
           <a
             href={`http://localhost:5000/uploads/${filePath.split(/[\\/]/).pop()}`}
@@ -47,18 +65,31 @@ const DocumentPreview = ({ filePath, filename, doc, onPlaceSignature }) => {
           <div className="flex items-center justify-between text-xs text-gray-500">
             <span>{Math.round(filePath?.size / 1024) || 0} KB</span>
             <span className="font-medium text-green-600">
-              {signatures.length > 0 ? `${signatures.length} signature${signatures.length > 1 ? 's' : ''}` : 'Ready to Sign'}
+              {signatures.length > 0
+                ? `${signatures.length} signature${signatures.length > 1 ? "s" : ""}`
+                : "Ready to Sign"}
             </span>
           </div>
         </div>
       </div>
-      
-      {/* Signature Action Button */}
+
+      {/* FIXED Signature Button - Backward compatible */}
       <button
-        onClick={() => onPlaceSignature?.(doc)}
+        onClick={() => {
+          if (onAction) onAction("sign");
+          else if (onPlaceSignature) onPlaceSignature(doc);
+        }}
         className="absolute -top-3 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg hover:bg-green-600 mt-2 opacity-0 group-hover:opacity-100 transition-all"
       >
         ✍️ Add Signature
+      </button>
+
+      {/* Audit Trail Button */}
+      <button
+        onClick={() => onAction?.("audit")}
+        className="absolute -top-3 right-4 bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg hover:bg-purple-700 opacity-0 group-hover:opacity-100 transition-all"
+      >
+        📊 Audit
       </button>
     </div>
   );

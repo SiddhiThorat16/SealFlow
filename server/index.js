@@ -3,7 +3,8 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const path = require('path');  // ADD THIS LINE
+const path = require('path');
+const auditMiddleware = require('./middleware/audit');
 require('dotenv').config();
 
 const app = express();
@@ -25,6 +26,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/signatures', require('./routes/signatures'));
 
 app.use('/api/public', require('./routes/public'));
+
+app.use('/api/docs', auditMiddleware, require('./routes/documents'));
 
 
 mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://thoratsiddhi35_db_user:GkcwFSFbDUzhpg70@sealflow.aitr0cz.mongodb.net/')
