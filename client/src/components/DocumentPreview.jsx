@@ -36,28 +36,28 @@ const DocumentPreview = ({ filePath, filename, doc, onAction, onPlaceSignature }
 
   return (
     <div className="relative group">
-      <div className="border rounded-lg shadow-sm bg-white overflow-hidden max-h-[500px] hover:shadow-md transition-shadow">
-        <div className="p-4 border-b bg-gradient-to-r from-gray-50 to-gray-100">
-          <h3 className="font-semibold text-gray-900 text-lg truncate pr-2 flex items-center">
-            {filename}
-            {/* NEW: Status Badge */}
-            {doc?.status && (
-              <span className={`ml-2 px-2 py-1 rounded-full text-xs font-bold ${
-                doc.status === 'signed' ? 'bg-green-100 text-green-800' :
-                doc.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                doc.status === 'expired' ? 'bg-orange-100 text-orange-800' :
-                'bg-yellow-100 text-yellow-800'
-              }`}>
-                {doc.status === 'signed' ? 'Signed' :
-                 doc.status === 'rejected' ? 'Rejected' :
-                 doc.status === 'expired' ? 'Expired' : 'Pending'}
-              </span>
-            )}
-          </h3>
-          <p className="text-xs text-gray-500 mt-1">{getStatusDisplay()}</p>
+      <div className="border rounded-lg shadow-sm bg-white overflow-hidden max-h-[500px] hover:shadow-lg transition-shadow transform hover:-translate-y-1">
+        <div className="p-4 border-b bg-white flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold text-gray-900 text-lg truncate pr-2 flex items-center gap-3">
+              <span className="text-sm text-gray-400">📄</span>
+              <span className="truncate">{filename}</span>
+            </h3>
+            <p className="text-xs text-gray-500 mt-1">{getStatusDisplay()}</p>
+          </div>
+          {doc?.status && (
+            <span className={`ml-2 px-3 py-1 rounded-full text-xs font-semibold ${
+              doc.status === 'signed' ? 'bg-green-100 text-green-800' :
+              doc.status === 'rejected' ? 'bg-red-100 text-red-800' :
+              doc.status === 'expired' ? 'bg-orange-100 text-orange-800' :
+              'bg-yellow-100 text-yellow-800'
+            }`}>
+              {doc.status === 'signed' ? 'Signed' : doc.status === 'rejected' ? 'Rejected' : doc.status === 'expired' ? 'Expired' : 'Pending'}
+            </span>
+          )}
         </div>
         <div className="p-6 bg-gradient-to-br from-white to-gray-50 flex flex-col items-center justify-center h-64">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+          <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-3xl flex items-center justify-center mb-4 shadow-lg">
             <svg
               className="w-8 h-8 text-white"
               fill="none"
@@ -72,16 +72,17 @@ const DocumentPreview = ({ filePath, filename, doc, onAction, onPlaceSignature }
               />
             </svg>
           </div>
-          <h4 className="text-xl font-bold text-gray-900 mb-1">PDF Preview</h4>
-          <p className="text-gray-600 text-sm mb-4 text-center max-w-xs">
-            {filename.length > 30 ? filename.slice(0, 30) + "..." : filename}
+          <h4 className="text-lg font-bold text-gray-900 mb-1">PDF Preview</h4>
+          <p className="text-gray-600 text-sm mb-4 text-center max-w-xs truncate">
+            {filename.length > 40 ? filename.slice(0, 40) + "..." : filename}
           </p>
           <a
             href={`http://localhost:5000/uploads/${filePath.split(/[\\/]/).pop()}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/></svg>
             Open PDF
           </a>
         </div>
@@ -97,24 +98,26 @@ const DocumentPreview = ({ filePath, filename, doc, onAction, onPlaceSignature }
         </div>
       </div>
 
-      {/* FIXED Signature Button - Backward compatible */}
-      <button
-        onClick={() => {
-          if (onAction) onAction("sign");
-          else if (onPlaceSignature) onPlaceSignature(doc);
-        }}
-        className="absolute -top-3 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg hover:bg-green-600 mt-2 opacity-0 group-hover:opacity-100 transition-all"
-      >
-        ✍️ Add Signature
-      </button>
+      <div className="absolute -top-3 left-4 opacity-0 group-hover:opacity-100 transition-all">
+        <button
+          onClick={() => {
+            if (onAction) onAction("sign");
+            else if (onPlaceSignature) onPlaceSignature(doc);
+          }}
+          className="bg-green-600 text-white px-3 py-1 rounded-full text-xs font-medium shadow hover:bg-green-700 flex items-center gap-2"
+        >
+          ✍️ <span className="hidden sm:inline">Add</span>
+        </button>
+      </div>
 
-      {/* Audit Trail Button */}
-      <button
-        onClick={() => onAction?.("audit")}
-        className="absolute -top-3 right-4 bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg hover:bg-purple-700 opacity-0 group-hover:opacity-100 transition-all"
-      >
-        📊 Audit
-      </button>
+      <div className="absolute -top-3 right-4 opacity-0 group-hover:opacity-100 transition-all">
+        <button
+          onClick={() => onAction?.("audit")}
+          className="bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-medium shadow hover:bg-purple-700 flex items-center gap-2"
+        >
+          📊 <span className="hidden sm:inline">Audit</span>
+        </button>
+      </div>
     </div>
   );
 };

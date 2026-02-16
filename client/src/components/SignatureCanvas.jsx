@@ -53,7 +53,7 @@ const SignatureCanvas = ({ onSignaturePlace, pageWidth = 800 }) => {
         ref={canvasRef}
         width={300}
         height={100}
-        className="w-full h-24 border-2 border-dashed border-gray-300 rounded-lg cursor-crosshair bg-gray-50 hover:border-blue-300 transition-all"
+        className="w-full h-24 border border-gray-200 rounded-lg cursor-crosshair bg-gray-50 hover:border-blue-300 transition-all shadow-sm"
         onMouseDown={startDrawing}
         onMouseMove={draw}
         onMouseUp={stopDrawing}
@@ -62,7 +62,7 @@ const SignatureCanvas = ({ onSignaturePlace, pageWidth = 800 }) => {
       <div className="flex gap-3 pt-2">
         <button
           onClick={placeSignature}
-          className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+          className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm"
         >
           ✓ Place Signature
         </button>

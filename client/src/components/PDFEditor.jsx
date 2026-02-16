@@ -120,25 +120,28 @@ const PDFEditor = ({ doc, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-6xl w-full max-h-[90vh] flex flex-col">
-        <div className="p-6 border-b bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-t-2xl">
-          <div className="flex items-center justify-between">
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-6xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+        <div className="p-6 border-b bg-gradient-to-r from-indigo-600 to-purple-600 text-white flex items-center justify-between">
+          <div>
             <h2 className="text-2xl font-bold">Sign Document</h2>
+            <p className="text-sm opacity-90">{doc?.originalName}</p>
+          </div>
+          <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="p-2 hover:bg-white/20 rounded-lg"
+              className="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white"
+              aria-label="Close"
             >
               ✕
             </button>
           </div>
-          <p>{doc?.originalName}</p>
         </div>
-        <div className="flex flex-1 p-6 overflow-hidden">
+        <div className="flex flex-1 p-6 overflow-hidden gap-6">
           <div className="flex-1 border-r pr-6">
             <div
               ref={containerRef}
-              className="relative w-full h-[500px] bg-gray-100 rounded-xl border-2 border-dashed border-blue-300"
+              className="relative w-full h-[520px] bg-white rounded-xl border border-gray-100 shadow-inner overflow-hidden"
             >
               <img
                 src={`/uploads/${doc?.filename}`}
@@ -156,43 +159,42 @@ const PDFEditor = ({ doc, onClose }) => {
                     height: sig.height,
                   }}
                 >
-                  <img src={sig.dataUrl} className="w-full h-full" />
+                  <img src={sig.dataUrl} className="w-full h-full object-cover" />
                 </div>
               ))}
             </div>
           </div>
           <div className="w-80 pl-6">
-            <h3 className="font-bold mb-4">Draw Signature</h3>
+            <h3 className="font-bold mb-4 text-gray-900">Draw Signature</h3>
             <canvas
               ref={canvasRef}
               width={300}
               height={120}
-              className="w-full h-32 border-2 border-dashed rounded-xl mb-4 cursor-crosshair"
+              className="w-full h-32 border border-gray-200 rounded-lg mb-4 cursor-crosshair shadow-sm"
               onMouseDown={startDrawing}
               onMouseMove={draw}
               onMouseUp={stopDrawing}
             />
             <button
               onClick={createSignaturePreview}
-              className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold mb-4"
+              className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold mb-4 hover:bg-blue-700 transition"
             >
               Add to PDF
             </button>
-            <div className="text-sm text-gray-600 space-y-1">
-              <div>
-                {signatures.length} signature
-                {signatures.length !== 1 ? "s" : ""}
+            <div className="text-sm text-gray-600 space-y-2">
+              <div className="flex items-center justify-between">
+                <div>{signatures.length} signature{signatures.length !== 1 ? "s" : ""}</div>
+                <button
+                  onClick={fetchSignatures}
+                  className="text-xs bg-green-500 text-white py-1 px-3 rounded"
+                >
+                  Save Positions
+                </button>
               </div>
-              <button
-                onClick={fetchSignatures}
-                className="w-full text-xs bg-green-500 text-white py-2 rounded mt-2"
-              >
-                Save Positions
-              </button>
             </div>
             <button
               onClick={finalizeDocument}
-              className="w-full bg-gradient-to-r from-emerald-500 to-green-600 text-white py-3 px-6 rounded-xl font-bold text-lg shadow-2xl hover:from-emerald-600 hover:to-green-700 transition-all mt-4"
+              className="w-full mt-6 bg-gradient-to-r from-emerald-500 to-green-600 text-white py-3 px-6 rounded-xl font-bold text-lg shadow-lg hover:from-emerald-600 hover:to-green-700 transition-all"
               disabled={signatures.length === 0}
             >
               🎉 Finalize & Download Signed PDF
