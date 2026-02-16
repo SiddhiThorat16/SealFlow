@@ -16,9 +16,9 @@ function AppContent() {
 function App() {
   return (
     <AuthProvider>
-      <Router>  {/* ADD ROUTER WRAPPER */}
+      <Router>
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-          <Routes>  {/* ADD ROUTES */}
+          <Routes>
             <Route path="/" element={<AppContent />} />
             <Route path="/public-sign/:token" element={<PublicSign />} />
             <Route path="/audit/:fileId" element={<AuditTrail />} />

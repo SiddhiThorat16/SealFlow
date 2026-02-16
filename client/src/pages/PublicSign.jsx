@@ -8,6 +8,7 @@ const PublicSign = () => {
   const { token } = useParams();
   const [doc, setDoc] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState('pending');
 
   useEffect(() => {
     fetchPublicDoc();
@@ -19,6 +20,7 @@ const PublicSign = () => {
       const data = await res.json();
       if (data.document) {
         setDoc(data.document);
+        setStatus(data.document.signatureRequests?.[0]?.status || 'pending');
       } else {
         alert(data.msg || 'Invalid link');
       }
@@ -29,12 +31,73 @@ const PublicSign = () => {
     }
   };
 
+  // NEW: Update signature status
+  const updateStatus = async (newStatus, reason = '') => {
+    try {
+      const res = await fetch(`/api/public/sign/${token}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus, rejectionReason: reason })
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        setStatus(newStatus);
+        if (newStatus === 'signed') {
+          alert('Document signed successfully!');
+        } else {
+          alert('Status updated');
+        }
+      }
+    } catch (err) {
+      alert('Status update failed');
+    }
+  };
+
   if (loading) return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   if (!doc) return <div className="flex items-center justify-center min-h-screen">Invalid or expired link</div>;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="max-w-6xl mx-auto p-8">
+        {/* NEW STATUS BAR */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border-2 border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className={`px-4 py-2 rounded-full text-sm font-bold ${
+                status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                status === 'viewed' ? 'bg-blue-100 text-blue-800' :
+                status === 'signed' ? 'bg-green-100 text-green-800' :
+                status === 'rejected' ? 'bg-red-100 text-red-800' : 
+                'bg-gray-100 text-gray-800'
+              }`}>
+                Status: {status.toUpperCase()}
+              </div>
+            </div>
+            <div className="flex gap-3">
+              {status === 'pending' && (
+                <>
+                  <button 
+                    onClick={() => updateStatus('signed')}
+                    className="px-6 py-2 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-colors"
+                  >
+                    ✅ Sign Document
+                  </button>
+                  <button 
+                    onClick={() => {
+                      const reason = prompt('Rejection reason?') || 'No reason provided';
+                      updateStatus('rejected', reason);
+                    }}
+                    className="px-6 py-2 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-colors"
+                  >
+                    ❌ Reject
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
             Sign Document

@@ -9,7 +9,23 @@ const documentSchema = new mongoose.Schema({
   size: { type: Number, required: true },
   mimetype: { type: String, required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  status: { type: String, enum: ['pending', 'signed', 'rejected'], default: 'pending' },
+  status: { 
+    type: String, 
+    enum: ['pending', 'signed', 'rejected', 'expired'], 
+    default: 'pending' 
+  },
+  signatureRequests: [{
+    signerEmail: String,
+    signerName: String,
+    status: { 
+      type: String, 
+      enum: ['pending', 'sent', 'viewed', 'signed', 'rejected'], 
+      default: 'pending' 
+    },
+    rejectionReason: String,
+    signedAt: Date,
+    viewedAt: Date
+  }],
   signatures: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Signature' }]
 }, { timestamps: true });
 

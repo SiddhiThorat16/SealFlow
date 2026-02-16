@@ -8,7 +8,13 @@ const signatureLinkSchema = new mongoose.Schema({
   token: { type: String, required: true, unique: true },
   expiresAt: { type: Date, required: true },
   used: { type: Boolean, default: false },
-  signerName: String
+  signerName: String,
+  status: {
+    type: String,
+    enum: ['pending', 'viewed', 'signed', 'rejected'],
+    default: 'pending'
+  },
+  rejectionReason: String
 }, { timestamps: true });
 
 module.exports = mongoose.model('SignatureLink', signatureLinkSchema);

@@ -23,14 +23,38 @@ const DocumentPreview = ({ filePath, filename, doc, onAction, onPlaceSignature }
 
   const proxyUrl = `/uploads/${filePath.split(/[\\/]/).pop()}`;
 
+  // NEW: Get document status for display
+  const getStatusDisplay = () => {
+    if (!doc?.status) return 'Pending signature';
+    switch (doc.status) {
+      case 'signed': return '✅ Signed';
+      case 'rejected': return '❌ Rejected';
+      case 'expired': return '⏰ Expired';
+      default: return '⏳ Pending signature';
+    }
+  };
+
   return (
     <div className="relative group">
       <div className="border rounded-lg shadow-sm bg-white overflow-hidden max-h-[500px] hover:shadow-md transition-shadow">
         <div className="p-4 border-b bg-gradient-to-r from-gray-50 to-gray-100">
-          <h3 className="font-semibold text-gray-900 text-lg truncate pr-2">
+          <h3 className="font-semibold text-gray-900 text-lg truncate pr-2 flex items-center">
             {filename}
+            {/* NEW: Status Badge */}
+            {doc?.status && (
+              <span className={`ml-2 px-2 py-1 rounded-full text-xs font-bold ${
+                doc.status === 'signed' ? 'bg-green-100 text-green-800' :
+                doc.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                doc.status === 'expired' ? 'bg-orange-100 text-orange-800' :
+                'bg-yellow-100 text-yellow-800'
+              }`}>
+                {doc.status === 'signed' ? 'Signed' :
+                 doc.status === 'rejected' ? 'Rejected' :
+                 doc.status === 'expired' ? 'Expired' : 'Pending'}
+              </span>
+            )}
           </h3>
-          <p className="text-xs text-gray-500 mt-1">Pending signature</p>
+          <p className="text-xs text-gray-500 mt-1">{getStatusDisplay()}</p>
         </div>
         <div className="p-6 bg-gradient-to-br from-white to-gray-50 flex flex-col items-center justify-center h-64">
           <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
